@@ -10,9 +10,9 @@ class SaleController extends Controller
     public static function addSale($id_seller, $value) {
         try {
             $sale = new Sale();
-            $sale->id_seller = $id_seller;
+            $sale->seller_id = $id_seller;
             $sale->value = $value;
-            $sale->comission = $value * 0.85;
+            $sale->comission = $value * 0.085;
             $sale->save();
             return $sale;
         } catch (Exception $e) {
@@ -20,10 +20,18 @@ class SaleController extends Controller
         }
     }
 
-    public static function editSale($id, $columnToEdit, $newValue) {
+    public static function editSale($id, $columnsToChange, $values) {
         try {
-            $sale = Self::getSaleById($id);
-            $sale->update([$columnToEdit => $newValue]);
+            $sale = self::getSaleById($id);
+            $updater = array();
+
+            foreach($columnsToChange as $index => $column) {
+                if($values[$index]) {
+                    $updater[$column] = $values[$index];
+                }
+            }
+        
+            $sale->update($updater);
             return $sale;
         } catch (Exception $e) {
             return $e;
@@ -52,6 +60,16 @@ class SaleController extends Controller
             $sale = Sale::where("id", $id);
             $sale->delete();
             return true;
+        } catch(Exception $e) {
+            return $e;
+        }
+    }
+
+    public static function getSaleBySellerId($id) {
+        try {
+            $sale = Sale::where("seller_id", $id)->get();
+    
+            return $sale;
         } catch(Exception $e) {
             return $e;
         }

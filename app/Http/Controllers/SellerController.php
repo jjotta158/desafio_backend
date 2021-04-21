@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use Mail;
 use App\Models\Seller;
 use Illuminate\Http\Request;
+use App\Http\Controllers\SaleController;
 
 class SellerController extends Controller
 {
@@ -19,11 +21,18 @@ class SellerController extends Controller
         }
     }
 
-    public static function editSeller(Request $request) {
+    public static function editSeller($id, $columnsToChange, $values) {
         try {
-            $seller = getSellerById($id);
-            $seller[$request->columnToEdit] = $request->newValue;
-            $seller->update();
+            $seller = self::getSellerById($id);
+            $updater = array();
+
+            foreach($columnsToChange as $index => $column) {
+                if($values[$index]) {
+                    $updater[$column] = $values[$index];
+                }
+            }
+        
+            $seller->update($updater);
             return $seller;
         } catch (Exception $e) {
             return $e;
@@ -51,5 +60,31 @@ class SellerController extends Controller
         } catch(Exception $e) {
             return $e;
         }
+    }
+
+    public static function sendDailyEmail() {
+        try {
+            $sellers = self::getAllSellers();
+
+            foreach ($sellers as $index => $seller) {
+                $sales = SaleController::getSaleBySellerId($seller->id);
+                $totalSale = 0;
+                $today = date("m.d.y");
+                
+                foreach ($sales as $sale) {
+                    $saleDate = date("m.d.y", strtotime($sale->created_at));
+                    if($today == $saleDate) {
+                        $totalSale = $totalSale + $sale->value;
+                    }
+                }           
+                Mail::send('mail.totalSales', ['seller' => $seller, 'totalSale' => $totalSale], function ($m) use($seller) {
+                    $m->from('teste@gmail.com', 'Atualização diária de vendas');
+
+                    $m->to($seller->email);
+                });
+            }
+        } catch (Exception $e) {
+            return $e;
+        }           
     }
 }
