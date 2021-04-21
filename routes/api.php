@@ -30,7 +30,7 @@ Route::prefix("sale")->group(function() {
     });
 
     Route::put("/", function(Request $request) {
-        return SaleController::editSale($request->saleId, $request->columnName,$request->newValue);
+        return SaleController::editSale($request->id, $request->columnsToChange,$request->values);
     });
 
     Route::delete("/{saleId}", function($saleId) {
@@ -54,7 +54,7 @@ Route::prefix("seller")->group(function() {
     });
 
     Route::put("/", function(Request $request) {
-        return SellerController::editSeller($request->sellerId, $request->columnName,$request->newValue);
+        return SellerController::editSeller($request->sellerId, $request->columnsToChange,$request->values);
     });
 
     Route::delete("/{sellerID}", function($sellerId) {
