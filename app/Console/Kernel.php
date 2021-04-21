@@ -4,6 +4,7 @@ namespace App\Console;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use App\Http\Controllers\SellerController;
 
 class Kernel extends ConsoleKernel
 {
@@ -23,8 +24,10 @@ class Kernel extends ConsoleKernel
      * @return void
      */
     protected function schedule(Schedule $schedule)
-    {
-        // $schedule->command('inspire')->hourly();
+    {        
+        $schedule->call(function() {
+            return SellerController::sendDailyEmail();
+        })->daily();
     }
 
     /**
